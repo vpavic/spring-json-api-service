@@ -1,5 +1,6 @@
 plugins {
     java
+    checkstyle
     id("io.spring.dependency-management") version "1.0.6.RELEASE"
     id("org.springframework.boot") version "2.1.0.RELEASE"
 }
@@ -25,4 +26,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-devtools")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+}
+
+checkstyle {
+    toolVersion = "8.14"
 }
