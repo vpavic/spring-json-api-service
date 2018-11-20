@@ -21,12 +21,13 @@ import java.util.Collections;
 import java.util.List;
 
 import com.github.jasminb.jsonapi.JSONAPIDocument;
+import com.github.jasminb.jsonapi.models.errors.Error;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping(path = "/articles", produces = "application/vnd.api+json")
@@ -41,16 +42,26 @@ public class ArticleEndpoint {
     }
 
     @GetMapping
-    public JSONAPIDocument<List<Article>> getArticles() {
-        return new JSONAPIDocument<>(Collections.singletonList(demoArticle));
+    public ResponseEntity<?> getArticles() {
+        List<Article> articles = Collections.singletonList(demoArticle);
+        return ResponseEntity.ok(new JSONAPIDocument<>(articles));
     }
 
     @GetMapping(path = "/{id}")
-    public JSONAPIDocument<Article> getArticle(@PathVariable String id) {
+    public ResponseEntity<?> getArticle(@PathVariable String id) {
         if (!"1".equals(id)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new JSONAPIDocument<>(notFound(id)));
         }
-        return new JSONAPIDocument<>(demoArticle);
+        return ResponseEntity.ok(new JSONAPIDocument<>(demoArticle));
+    }
+
+    private static Error notFound(String id) {
+        Error error = new Error();
+        error.setId(id);
+        error.setStatus("404");
+        error.setCode("Not Found");
+        error.setDetail("Article " + id + " not found");
+        return error;
     }
 
 }
