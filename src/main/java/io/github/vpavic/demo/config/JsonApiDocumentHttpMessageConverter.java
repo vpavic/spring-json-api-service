@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,13 @@
 package io.github.vpavic.demo.config;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import com.github.jasminb.jsonapi.JSONAPIDocument;
 import com.github.jasminb.jsonapi.ResourceConverter;
 import com.github.jasminb.jsonapi.exceptions.DocumentSerializationException;
+import org.springframework.core.GenericTypeResolver;
 import org.springframework.http.HttpInputMessage;
 import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
@@ -32,14 +34,9 @@ public class JsonApiDocumentHttpMessageConverter extends AbstractGenericHttpMess
 
     private final ResourceConverter resourceConverter;
 
-    public JsonApiDocumentHttpMessageConverter(ResourceConverter resourceConverter) {
+    JsonApiDocumentHttpMessageConverter(ResourceConverter resourceConverter) {
         super(MediaType.valueOf("application/vnd.api+json"));
         this.resourceConverter = resourceConverter;
-    }
-
-    @Override
-    public JSONAPIDocument read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -48,8 +45,20 @@ public class JsonApiDocumentHttpMessageConverter extends AbstractGenericHttpMess
     }
 
     @Override
-    protected JSONAPIDocument readInternal(Class<? extends JSONAPIDocument<?>> clazz, HttpInputMessage inputMessage) {
-        throw new UnsupportedOperationException();
+    public JSONAPIDocument read(Type type, Class<?> contextClass, HttpInputMessage inputMessage) throws IOException {
+        return readResolved(GenericTypeResolver.resolveType(type, contextClass), inputMessage);
+    }
+
+    @Override
+    protected JSONAPIDocument readInternal(Class<? extends JSONAPIDocument<?>> clazz, HttpInputMessage inputMessage)
+            throws IOException {
+        return readResolved(clazz, inputMessage);
+    }
+
+    @SuppressWarnings("unchecked")
+    private JSONAPIDocument readResolved(Type resolvedType, HttpInputMessage inputMessage) throws IOException {
+        return this.resourceConverter.readDocument(inputMessage.getBody().readAllBytes(),
+                (Class) ((ParameterizedType) resolvedType).getActualTypeArguments()[0]);
     }
 
     @Override

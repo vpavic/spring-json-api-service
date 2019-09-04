@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 the original author or authors.
+ * Copyright 2019 the original author or authors.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +22,8 @@ import com.github.jasminb.jsonapi.annotations.Id;
 import com.github.jasminb.jsonapi.annotations.Relationship;
 import com.github.jasminb.jsonapi.annotations.Type;
 
+import io.github.vpavic.demo.intefaces.people.People;
+
 @Type("article")
 public class Article {
 
@@ -39,7 +41,7 @@ public class Article {
     @Relationship("author")
     private People author;
 
-    Article(String id, String title, String body, Instant created, Instant updated, People author) {
+    public Article(String id, String title, String body, Instant created, Instant updated, People author) {
         this.id = id;
         this.title = title;
         this.body = body;
@@ -72,4 +74,9 @@ public class Article {
         return this.author;
     }
 
+    @Override
+    public String toString() {
+        return "Article{" + "id='" + this.id + '\'' + ", title='" + this.title + '\'' + ", body='" + this.body + '\''
+                + ", created=" + this.created + ", updated=" + this.updated + ", author=" + this.author + '}';
+    }
 }

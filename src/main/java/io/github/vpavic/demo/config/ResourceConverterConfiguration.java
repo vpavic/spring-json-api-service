@@ -16,26 +16,27 @@
 
 package io.github.vpavic.demo.config;
 
-import java.util.List;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.jasminb.jsonapi.ResourceConverter;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.converter.HttpMessageConverter;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import io.github.vpavic.demo.intefaces.article.Article;
+import io.github.vpavic.demo.intefaces.people.People;
 
 @Configuration
-public class WebMvcConfiguration implements WebMvcConfigurer {
+public class ResourceConverterConfiguration {
 
-    private final ResourceConverter resourceConverter;
+    private final ObjectMapper objectMapper;
 
-    public WebMvcConfiguration(ObjectProvider<ResourceConverter> resourceConverter) {
-        this.resourceConverter = resourceConverter.getObject();
+    public ResourceConverterConfiguration(ObjectProvider<ObjectMapper> objectMapper) {
+        this.objectMapper = objectMapper.getObject();
     }
 
-    @Override
-    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(0, new JsonApiDocumentHttpMessageConverter(this.resourceConverter));
+    @Bean
+    public ResourceConverter resourceConverter() {
+        return new ResourceConverter(this.objectMapper, Article.class, People.class);
     }
 
 }
